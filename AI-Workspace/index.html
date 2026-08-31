@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Workspace</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">AI Workspace</div>
+    <div class="header-user">
+      <span>Admin User</span>
+      <span class="arrow">▾</span>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- BARRE LATERALE -->
+    <aside class="sidebar">
+      <nav>
+        <ul class="nav-list">
+          <li><button class="nav-link active" data-target="dashboard">Tableau de bord</button></li>
+          <li><button class="nav-link" data-target="chat">Chat</button></li>
+          <li><button class="nav-link" data-target="resume">Résumé de texte</button></li>
+          <li><button class="nav-link" data-target="traduction">Traduction</button></li>
+          <li><button class="nav-link" data-target="prediction">Prédiction</button></li>
+          <li><button class="nav-link" data-target="historique">Historique</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ZONE PRINCIPALE -->
+    <main class="main-content">
+
+      <!-- Tableau de bord -->
+      <section id="dashboard" class="view active">
+        <h1>Tableau de bord</h1>
+        <p class="subtitle">Bienvenue sur votre espace de travail intelligent.</p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Nombre de requêtes</p>
+            <p class="stat-value" id="stat-requetes">0</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Nombre de modèles disponibles</p>
+            <p class="stat-value">12</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Tâches exécutées</p>
+            <p class="stat-value" id="stat-taches">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat IA -->
+      <section id="chat" class="view">
+        <h1>Chat IA</h1>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="input-row">
+          <input type="text" id="chat-input" placeholder="Écrivez votre message...">
+          <button id="chat-send">Envoyer</button>
+        </div>
+      </section>
+
+      <!-- Résumé de texte -->
+      <section id="resume" class="view">
+        <h1>Résumé de texte</h1>
+        <textarea id="resume-input" placeholder="Collez votre texte ici..."></textarea>
+        <button id="resume-btn">Résumer</button>
+        <div class="result-box" id="resume-output"></div>
+      </section>
+
+      <!-- Traduction -->
+      <section id="traduction" class="view">
+        <h1>Traduction</h1>
+        <textarea id="traduction-input" placeholder="Texte à traduire..."></textarea>
+        <select id="traduction-langue">
+          <option value="en">Anglais</option>
+          <option value="es">Espagnol</option>
+          <option value="ar">Arabe</option>
+          <option value="wo">Wolof</option>
+        </select>
+        <button id="traduction-btn">Traduire</button>
+        <div class="result-box" id="traduction-output"></div>
+      </section>
+
+      <!-- Prédiction -->
+      <section id="prediction" class="view">
+        <h1>Prédiction</h1>
+        <div class="form-group">
+          <label for="pred-age">Âge</label>
+          <input type="number" id="pred-age" placeholder="Ex: 28">
+        </div>
+        <div class="form-group">
+          <label for="pred-revenu">Revenu</label>
+          <input type="number" id="pred-revenu" placeholder="Ex: 350000">
+        </div>
+        <div class="form-group">
+          <label for="pred-ville">Ville</label>
+          <input type="text" id="pred-ville" placeholder="Ex: Dakar">
+        </div>
+        <button id="pred-btn">Prédire</button>
+        <div class="result-box" id="pred-output"></div>
+      </section>
+
+      <!-- Historique -->
+      <section id="historique" class="view">
+        <h1>Historique</h1>
+        <div class="input-row">
+          <input type="text" id="historique-search" placeholder="Rechercher dans l'historique...">
+          <button id="historique-clear">Vider l'historique</button>
+        </div>
+        <ul class="historique-list" id="historique-list"></ul>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+// ===================================================================
+// DONNÉES SIMULÉES (Tableau de bord)
+// ===================================================================
+const donneesRequetesParJour = [
+  { jour: "15 Mai", valeur: 150 },
+  { jour: "16 Mai", valeur: 210 },
+  { jour: "17 Mai", valeur: 140 },
+  { jour: "18 Mai", valeur: 220 },
+  { jour: "19 Mai", valeur: 260 },
+  { jour: "20 Mai", valeur: 290 },
+  { jour: "21 Mai", valeur: 320 }
+];
+
+const donneesRepartitionServices = [
+  { label: "Chat", valeur: 38, couleur: "#4f46e5" },
+  { label: "Résumé de texte", valeur: 22, couleur: "#16a34a" },
+  { label: "Classification", valeur: 18, couleur: "#9333ea" },
+  { label: "Traduction", valeur: 12, couleur: "#f59e0b" },
+  { label: "Autres", valeur: 10, couleur: "#3b82f6" }
+];
+
+const activiteRecente = [
+  { activite: "Résumé du document_projet.pdf", service: "Résumé de texte", utilisateur: "Admin User", date: "21/05/2024 14:32" },
+  { activite: "Classification de sentiments", service: "Classification", utilisateur: "Admin User", date: "21/05/2024 14:21" },
+  { activite: "Traduction FR → EN", service: "Traduction", utilisateur: "Admin User", date: "21/05/2024 14:15" },
+  { activite: "Discussion sur l'IA générative", service: "Chat", utilisateur: "Admin User", date: "21/05/2024 14:05" },
+  { activite: "Génération d'idées de projet", service: "Idées", utilisateur: "Admin User", date: "21/05/2024 13:50" }
+];
+
+const modelesPopulaires = [
+  { modele: "mistral-7b-instruct", utilisations: 532 },
+  { modele: "gpt-4-turbo", utilisations: 389 },
+  { modele: "llama-3-8b", utilisations: 256 },
+  { modele: "bert-base-uncased", utilisations: 179 },
+  { modele: "google-translate-v1", utilisations: 142 }
+];
+
+// ===================================================================
+// NAVIGATION ENTRE LES MODULES
+// ===================================================================
+function initNavigation() {
+  const liens = document.querySelectorAll(".nav-link");
+
+  liens.forEach(lien => {
+    lien.addEventListener("click", () => {
+      const cible = lien.getAttribute("data-target");
+
+      // Désactive tous les liens et vues
+      liens.forEach(l => l.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+
+      // Active le lien et la vue cliqués
+      lien.classList.add("active");
+      document.getElementById(cible).classList.add("active");
+    });
+  });
+}
+
+
+
+// ===================================================================
+// REMPLISSAGE DES TABLEAUX
+// ===================================================================
+function remplirTableauActivite() {
+  const corps = document.getElementById("activite-recente-body");
+  corps.innerHTML = activiteRecente.map(a => `
+    <tr>
+      <td>${a.activite}</td>
+      <td>${a.service}</td>
+      <td>${a.utilisateur}</td>
+      <td>${a.date}</td>
+    </tr>
+  `).join("");
+}
+
+function remplirTableauModeles() {
+  const corps = document.getElementById("modeles-populaires-body");
+  corps.innerHTML = modelesPopulaires.map(m => `
+    <tr>
+      <td>${m.modele}</td>
+      <td>${m.utilisations}</td>
+    </tr>
+  `).join("");
+}
+
+// ===================================================================
+// INITIALISATION DU TABLEAU DE BORD
+// ===================================================================
+function initDashboard() {
+  remplirTableauActivite();
+  remplirTableauModeles();
+}
+
+// ===================================================================
+// DÉMARRAGE
+// ===================================================================
+document.addEventListener("DOMContentLoaded", () => {
+  initNavigation();
+  initDashboard();
+});

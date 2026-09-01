@@ -20,42 +20,75 @@
   <div class="layout">
 
     <!-- BARRE LATERALE -->
-    <aside class="sidebar">
-      <nav>
-        <ul class="nav-list">
-          <li><button class="nav-link active" data-target="dashboard">Tableau de bord</button></li>
-          <li><button class="nav-link" data-target="chat">Chat</button></li>
-          <li><button class="nav-link" data-target="resume">Résumé de texte</button></li>
-          <li><button class="nav-link" data-target="traduction">Traduction</button></li>
-          <li><button class="nav-link" data-target="prediction">Prédiction</button></li>
-          <li><button class="nav-link" data-target="historique">Historique</button></li>
-        </ul>
-      </nav>
-    </aside>
+   <!-- Tableau de bord -->
+<section id="dashboard" class="view active">
+  <h1>Tableau de bord</h1>
+  <p class="subtitle">Bienvenue sur votre espace de travail intelligent.</p>
 
-    <!-- ZONE PRINCIPALE -->
-    <main class="main-content">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <p class="stat-label">Nombre de jeux de données</p>
+      <p class="stat-value" id="stat-datasets">24</p>
+      <p class="stat-trend">+3 ce mois-ci</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Nombre de requêtes</p>
+      <p class="stat-value" id="stat-requetes">1,256</p>
+      <p class="stat-trend">+18% ce mois-ci</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Nombre de modèles disponibles</p>
+      <p class="stat-value" id="stat-modeles">12</p>
+      <p class="stat-trend">+2 ce mois-ci</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Utilisateurs actifs</p>
+      <p class="stat-value" id="stat-utilisateurs">8</p>
+      <p class="stat-trend">+2 ce mois-ci</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Tâches exécutées</p>
+      <p class="stat-value" id="stat-taches">342</p>
+      <p class="stat-trend">+22% ce mois-ci</p>
+    </div>
+  </div>
 
-      <!-- Tableau de bord -->
-      <section id="dashboard" class="view active">
-        <h1>Tableau de bord</h1>
-        <p class="subtitle">Bienvenue sur votre espace de travail intelligent.</p>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h2>Requêtes par jour</h2>
+      <span class="chart-period">7 derniers jours</span>
+      <canvas id="chart-line" width="500" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Répartition des requêtes par service</h2>
+      <canvas id="chart-donut" width="220" height="220"></canvas>
+      <ul class="chart-legend" id="donut-legend"></ul>
+    </div>
+  </div>
 
-        <div class="stats-grid">
-          <div class="stat-card">
-            <p class="stat-label">Nombre de requêtes</p>
-            <p class="stat-value" id="stat-requetes">0</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">Nombre de modèles disponibles</p>
-            <p class="stat-value">12</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">Tâches exécutées</p>
-            <p class="stat-value" id="stat-taches">0</p>
-          </div>
-        </div>
-      </section>
+  <div class="tables-grid">
+    <div class="table-card">
+      <h2>Activité récente</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Activité</th><th>Service</th><th>Utilisateur</th><th>Date</th></tr>
+        </thead>
+        <tbody id="activite-recente-body"></tbody>
+      </table>
+      <a href="#" class="voir-tout">Voir tout l'historique</a>
+    </div>
+    <div class="table-card">
+      <h2>Modèles populaires</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Modèle</th><th>Utilisations</th></tr>
+        </thead>
+        <tbody id="modeles-populaires-body"></tbody>
+      </table>
+      <a href="#" class="voir-tout">Voir tous les modèles</a>
+    </div>
+  </div>
+</section>>
 
       <!-- Chat IA -->
       <section id="chat" class="view">

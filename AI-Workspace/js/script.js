@@ -277,6 +277,53 @@ function initChat() {
   });
 }
 // ===================================================================
+// PARTIE 6 : PRÉDICTION (fictive)
+// ===================================================================
+function genererPredictionFictive(age, revenu, ville) {
+  // Logique fictive simple, juste pour donner un résultat crédible
+  let categorie;
+  let score;
+
+  if (revenu > 500000 && age > 30) {
+    categorie = "Profil premium";
+    score = 88;
+  } else if (revenu > 200000) {
+    categorie = "Profil standard";
+    score = 65;
+  } else {
+    categorie = "Profil découverte";
+    score = 42;
+  }
+
+  return `D'après les données fournies (${age} ans, ${revenu} FCFA de revenu, ${ville}), `
+    + `le profil estimé est : "${categorie}" avec un score de confiance fictif de ${score}%.`;
+}
+
+function initPrediction() {
+  const bouton = document.getElementById("pred-btn");
+  const inputAge = document.getElementById("pred-age");
+  const inputRevenu = document.getElementById("pred-revenu");
+  const inputVille = document.getElementById("pred-ville");
+  const output = document.getElementById("pred-output");
+
+  bouton.addEventListener("click", () => {
+    const age = parseInt(inputAge.value, 10);
+    const revenu = parseInt(inputRevenu.value, 10);
+    const ville = inputVille.value.trim();
+
+    if (isNaN(age) || isNaN(revenu) || ville === "") {
+      output.textContent = "Veuillez remplir l'âge, le revenu et la ville.";
+      return;
+    }
+
+    output.textContent = "Calcul de la prédiction...";
+
+    setTimeout(() => {
+      output.textContent = genererPredictionFictive(age, revenu, ville);
+    }, 600);
+  });
+}
+// ===================================================================
 // INITIALISATION DU TABLEAU DE BORD
 // ===================================================================
 function initDashboard() {
@@ -285,6 +332,7 @@ function initDashboard() {
   initResume();
   initTraduction();
   initChat();
+  initPrediction();
 }
 
 // ===================================================================

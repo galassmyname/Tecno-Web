@@ -128,7 +128,54 @@ function initResume() {
     }, 1000);
   });
 }
+// ===================================================================
+// PARTIE 4 : TRADUCTION (simulée)
+// ===================================================================
+const traductionsSimulees = {
+  en: { prefixe: "[EN] ", suffixe: "" },
+  es: { prefixe: "[ES] ", suffixe: "" },
+  ar: { prefixe: "[AR] ", suffixe: "" },
+  wo: { prefixe: "[WO] ", suffixe: "" }
+};
 
+const nomsLangues = {
+  en: "Anglais",
+  es: "Espagnol",
+  ar: "Arabe",
+  wo: "Wolof"
+};
+
+function genererTraductionSimulee(texte, langue) {
+  const config = traductionsSimulees[langue];
+  // Simulation : on inverse le sens des mots avec un préfixe de langue,
+  // pour donner l'impression d'un résultat traduit sans vrai modèle IA.
+  const motsInverses = texte.trim().split(/\s+/).reverse().join(" ");
+  return `${config.prefixe}${motsInverses}`;
+}
+
+function initTraduction() {
+  const bouton = document.getElementById("traduction-btn");
+  const input = document.getElementById("traduction-input");
+  const select = document.getElementById("traduction-langue");
+  const output = document.getElementById("traduction-output");
+
+  bouton.addEventListener("click", () => {
+    const texte = input.value.trim();
+    const langue = select.value;
+
+    if (texte === "") {
+      output.textContent = "Veuillez saisir un texte à traduire.";
+      return;
+    }
+
+    output.textContent = `Traduction vers ${nomsLangues[langue]} en cours...`;
+
+    setTimeout(() => {
+      const traduction = genererTraductionSimulee(texte, langue);
+      output.textContent = traduction;
+    }, 1000);
+  });
+}
 // ===================================================================
 // INITIALISATION DU TABLEAU DE BORD
 // ===================================================================
@@ -136,6 +183,7 @@ function initDashboard() {
   remplirTableauActivite();
   remplirTableauModeles();
   initResume();
+  initTraduction();
 }
 
 // ===================================================================

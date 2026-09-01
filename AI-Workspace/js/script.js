@@ -82,6 +82,52 @@ function remplirTableauModeles() {
     </tr>
   `).join("");
 }
+// ===================================================================
+// PARTIE 3 : RÉSUMÉ DE TEXTE (simulé)
+// ===================================================================
+function genererResumeSimule(texte) {
+  // Simulation simple : on garde la 1ère phrase + une phrase du milieu,
+  // pour donner l'impression d'un résumé sans vrai modèle IA.
+  const phrases = texte
+    .split(/(?<=[.!?])\s+/)
+    .map(p => p.trim())
+    .filter(p => p.length > 0);
+
+  if (phrases.length === 0) {
+    return "Aucun texte à résumer.";
+  }
+  if (phrases.length === 1) {
+    return phrases[0];
+  }
+
+  const premierePhrase = phrases[0];
+  const phraseMilieu = phrases[Math.floor(phrases.length / 2)];
+
+  return `${premierePhrase} ${phraseMilieu}`;
+}
+
+function initResume() {
+  const bouton = document.getElementById("resume-btn");
+  const input = document.getElementById("resume-input");
+  const output = document.getElementById("resume-output");
+
+  bouton.addEventListener("click", () => {
+    const texte = input.value.trim();
+
+    if (texte === "") {
+      output.textContent = "Veuillez saisir un texte à résumer.";
+      return;
+    }
+
+    output.textContent = "Génération du résumé...";
+
+    // Petit délai simulé pour imiter un traitement IA
+    setTimeout(() => {
+      const resume = genererResumeSimule(texte);
+      output.textContent = resume;
+    }, 1000);
+  });
+}
 
 // ===================================================================
 // INITIALISATION DU TABLEAU DE BORD
@@ -89,12 +135,11 @@ function remplirTableauModeles() {
 function initDashboard() {
   remplirTableauActivite();
   remplirTableauModeles();
+  initResume();
 }
 
 // ===================================================================
 // DÉMARRAGE
 // ===================================================================
-document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   initDashboard();
-});

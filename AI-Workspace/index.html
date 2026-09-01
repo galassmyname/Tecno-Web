@@ -106,15 +106,23 @@
         </div>
       </section>
 
-      <!-- Chat IA -->
-      <section id="chat" class="view">
-        <h1>Chat IA</h1>
-        <div class="chat-box" id="chat-box"></div>
-        <div class="input-row">
-          <input type="text" id="chat-input" placeholder="Écrivez votre message...">
-          <button id="chat-send">Envoyer</button>
-        </div>
-      </section>
+     <!-- Chat IA -->
+<section id="chat" class="view">
+  <h1>Chat IA</h1>
+
+  <div class="api-key-row">
+    <label for="hf-token">Clé API Hugging Face</label>
+    <input type="password" id="hf-token" placeholder="hf_...">
+    <button id="hf-token-save">Enregistrer</button>
+  </div>
+  <p class="api-key-info" id="hf-token-status"></p>
+
+  <div class="chat-box" id="chat-box"></div>
+  <div class="input-row">
+    <input type="text" id="chat-input" placeholder="Écrivez votre message...">
+    <button id="chat-send">Envoyer</button>
+  </div>
+</section>
 
       <!-- Résumé de texte -->
       <section id="resume" class="view">

@@ -177,6 +177,106 @@ function initTraduction() {
   });
 }
 // ===================================================================
+// PARTIE 5 : CHAT IA (vrai modèle via Hugging Face Inference API)
+// ===================================================================
+const HF_API_URL = "https://router.huggingface.co/v1/chat/completions";
+const HF_MODEL = "meta-llama/Llama-3.1-8B-Instruct"; // change ici si besoin
+
+let historiqueConversation = [];
+
+function chargerCleHF() {
+  const statut = document.getElementById("hf-token-status");
+  const cleSauvegardee = localStorage.getItem("hf_token");
+
+  if (cleSauvegardee) {
+    document.getElementById("hf-token").value = cleSauvegardee;
+    statut.textContent = "Clé API chargée.";
+  }
+
+  document.getElementById("hf-token-save").addEventListener("click", () => {
+    const cle = document.getElementById("hf-token").value.trim();
+    if (cle === "") {
+      statut.textContent = "Veuillez saisir une clé.";
+      statut.style.color = "#dc2626";
+      return;
+    }
+    localStorage.setItem("hf_token", cle);
+    statut.textContent = "Clé API enregistrée sur cet appareil.";
+    statut.style.color = "#16a34a";
+  });
+}
+
+function ajouterMessageChat(texte, role) {
+  const chatBox = document.getElementById("chat-box");
+  const div = document.createElement("div");
+  div.className = `chat-message ${role}`;
+  div.textContent = texte;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function envoyerMessageChat(message) {
+  const cle = localStorage.getItem("hf_token");
+
+  if (!cle) {
+    ajouterMessageChat("Merci de renseigner ta clé API Hugging Face ci-dessus avant de discuter.", "ai");
+    return;
+  }
+
+  historiqueConversation.push({ role: "user", content: message });
+
+  try {
+    const reponse = await fetch(HF_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${cle}`
+      },
+      body: JSON.stringify({
+        model: HF_MODEL,
+        messages: historiqueConversation,
+        max_tokens: 300
+      })
+    });
+
+    if (!reponse.ok) {
+      const erreur = await reponse.text();
+      throw new Error(`Erreur API (${reponse.status}) : ${erreur}`);
+    }
+
+    const donnees = await reponse.json();
+    const texteReponse = donnees.choices[0].message.content;
+
+    historiqueConversation.push({ role: "assistant", content: texteReponse });
+    ajouterMessageChat(texteReponse, "ai");
+
+  } catch (erreur) {
+    console.error(erreur);
+    ajouterMessageChat("Une erreur est survenue lors de l'appel au modèle. Vérifie ta clé API et ta connexion.", "ai");
+  }
+}
+
+function initChat() {
+  chargerCleHF();
+
+  const bouton = document.getElementById("chat-send");
+  const input = document.getElementById("chat-input");
+
+  const envoyer = () => {
+    const message = input.value.trim();
+    if (message === "") return;
+
+    ajouterMessageChat(message, "user");
+    input.value = "";
+    envoyerMessageChat(message);
+  };
+
+  bouton.addEventListener("click", envoyer);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") envoyer();
+  });
+}
+// ===================================================================
 // INITIALISATION DU TABLEAU DE BORD
 // ===================================================================
 function initDashboard() {
@@ -184,6 +284,7 @@ function initDashboard() {
   remplirTableauModeles();
   initResume();
   initTraduction();
+  initChat();
 }
 
 // ===================================================================

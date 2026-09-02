@@ -45,6 +45,25 @@ function initNavigation() {
     lien.addEventListener("click", () => {
       const cible = lien.getAttribute("data-target");
 
+      liens.forEach(l => l.classList.remove("active"));
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+
+      lien.classList.add("active");
+      document.getElementById(cible).classList.add("active");
+
+      // Rafraîchit l'historique à chaque fois qu'on ouvre cet onglet
+      if (cible === "historique") {
+        afficherHistorique();
+      }
+    });
+  });
+}
+  const liens = document.querySelectorAll(".nav-link");
+
+  liens.forEach(lien => {
+    lien.addEventListener("click", () => {
+      const cible = lien.getAttribute("data-target");
+
       // Désactive tous les liens et vues
       liens.forEach(l => l.classList.remove("active"));
       document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
@@ -54,7 +73,7 @@ function initNavigation() {
       document.getElementById(cible).classList.add("active");
     });
   });
-}
+
 
 
 
@@ -125,6 +144,7 @@ function initResume() {
     setTimeout(() => {
       const resume = genererResumeSimule(texte);
       output.textContent = resume;
+      ajouterHistorique("Résumé de texte", texte, resume);
     }, 1000);
   });
 }
@@ -173,6 +193,7 @@ function initTraduction() {
     setTimeout(() => {
       const traduction = genererTraductionSimulee(texte, langue);
       output.textContent = traduction;
+      ajouterHistorique("Traduction", texte, traduction);
     }, 1000);
   });
 }
@@ -249,6 +270,7 @@ async function envoyerMessageChat(message) {
 
     historiqueConversation.push({ role: "assistant", content: texteReponse });
     ajouterMessageChat(texteReponse, "ai");
+    ajouterHistorique("Chat", message, texteReponse);
 
   } catch (erreur) {
     console.error(erreur);
@@ -319,8 +341,99 @@ function initPrediction() {
     output.textContent = "Calcul de la prédiction...";
 
     setTimeout(() => {
-      output.textContent = genererPredictionFictive(age, revenu, ville);
-    }, 600);
+  const resultat = genererPredictionFictive(age, revenu, ville);
+  output.textContent = resultat;
+  ajouterHistorique("Prédiction", `Âge: ${age}, Revenu: ${revenu}, Ville: ${ville}`, resultat);
+}, 600);
+  });
+}
+// ===================================================================
+// PARTIE 7 : HISTORIQUE (localStorage)
+// ===================================================================
+const CLE_HISTORIQUE = "ai_workspace_historique";
+
+function chargerHistorique() {
+  const donnees = localStorage.getItem(CLE_HISTORIQUE);
+  return donnees ? JSON.parse(donnees) : [];
+}
+
+function sauvegarderHistorique(historique) {
+  localStorage.setItem(CLE_HISTORIQUE, JSON.stringify(historique));
+}
+
+function ajouterHistorique(service, requete, resultat) {
+  const historique = chargerHistorique();
+  historique.unshift({
+    id: Date.now(),
+    service,
+    requete,
+    resultat,
+    date: new Date().toLocaleString("fr-FR")
+  });
+  sauvegarderHistorique(historique);
+
+  // Rafraîchit l'affichage si on est déjà sur l'onglet Historique
+  if (document.getElementById("historique").classList.contains("active")) {
+    afficherHistorique(document.getElementById("historique-search").value);
+  }
+}
+
+function afficherHistorique(filtre = "") {
+  const liste = document.getElementById("historique-list");
+  const historique = chargerHistorique();
+  const filtreMin = filtre.trim().toLowerCase();
+
+  const resultatsFiltres = filtreMin === ""
+    ? historique
+    : historique.filter(h =>
+        h.service.toLowerCase().includes(filtreMin) ||
+        h.requete.toLowerCase().includes(filtreMin) ||
+        h.resultat.toLowerCase().includes(filtreMin)
+      );
+
+  if (resultatsFiltres.length === 0) {
+    liste.innerHTML = `<li>Aucun élément dans l'historique.</li>`;
+    return;
+  }
+
+  liste.innerHTML = resultatsFiltres.map(h => `
+    <li>
+      <div>
+        <strong>${h.service}</strong> — ${h.date}<br>
+        <span>${h.requete.substring(0, 60)}${h.requete.length > 60 ? "..." : ""}</span>
+      </div>
+      <button class="delete-item" data-id="${h.id}">Supprimer</button>
+    </li>
+  `).join("");
+
+  liste.querySelectorAll(".delete-item").forEach(bouton => {
+    bouton.addEventListener("click", () => {
+      supprimerEntreeHistorique(parseInt(bouton.dataset.id, 10));
+    });
+  });
+}
+
+function supprimerEntreeHistorique(id) {
+  const historique = chargerHistorique().filter(h => h.id !== id);
+  sauvegarderHistorique(historique);
+  afficherHistorique(document.getElementById("historique-search").value);
+}
+
+function initHistorique() {
+  const champRecherche = document.getElementById("historique-search");
+  const boutonVider = document.getElementById("historique-clear");
+
+  afficherHistorique();
+
+  champRecherche.addEventListener("input", () => {
+    afficherHistorique(champRecherche.value);
+  });
+
+  boutonVider.addEventListener("click", () => {
+    if (confirm("Vider tout l'historique ?")) {
+      sauvegarderHistorique([]);
+      afficherHistorique();
+    }
   });
 }
 // ===================================================================
@@ -340,3 +453,4 @@ function initDashboard() {
 // ===================================================================
   initNavigation();
   initDashboard();
+  initHistorique();

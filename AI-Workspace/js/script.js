@@ -102,30 +102,36 @@ function remplirTableauModeles() {
   `).join("");
 }
 // ===================================================================
-// PARTIE 3 : RÉSUMÉ DE TEXTE (simulé)
+// PARTIE 3 : RÉSUMÉ DE TEXTE (vrai modèle)
 // ===================================================================
-function genererResumeSimule(texte) {
-  // Simulation simple : on garde la 1ère phrase + une phrase du milieu,
-  // pour donner l'impression d'un résumé sans vrai modèle IA.
-  const phrases = texte
-    .split(/(?<=[.!?])\s+/)
-    .map(p => p.trim())
-    .filter(p => p.length > 0);
-
-  if (phrases.length === 0) {
-    return "Aucun texte à résumer.";
-  }
-  if (phrases.length === 1) {
-    return phrases[0];
-  }
-
-  const premierePhrase = phrases[0];
-  const phraseMilieu = phrases[Math.floor(phrases.length / 2)];
-
-  return `${premierePhrase} ${phraseMilieu}`;
-}
-
 function initResume() {
+  const bouton = document.getElementById("resume-btn");
+  const input = document.getElementById("resume-input");
+  const output = document.getElementById("resume-output");
+
+  bouton.addEventListener("click", async () => {
+    const texte = input.value.trim();
+
+    if (texte === "") {
+      output.textContent = "Veuillez saisir un texte à résumer.";
+      return;
+    }
+
+    output.textContent = "Génération du résumé...";
+
+    try {
+      const resume = await appellerModeleHF([
+        { role: "system", content: "Tu es un assistant qui résume des textes en français, en 2 à 3 phrases maximum, sans commentaire ni introduction." },
+        { role: "user", content: texte }
+      ]);
+      output.textContent = resume;
+      ajouterHistorique("Résumé de texte", texte, resume);
+    } catch (erreur) {
+      console.error(erreur);
+      output.textContent = "Erreur lors de la génération du résumé. Vérifie ta clé API.";
+    }
+  });
+}
   const bouton = document.getElementById("resume-btn");
   const input = document.getElementById("resume-input");
   const output = document.getElementById("resume-output");
@@ -147,16 +153,11 @@ function initResume() {
       ajouterHistorique("Résumé de texte", texte, resume);
     }, 1000);
   });
-}
+
 // ===================================================================
 // PARTIE 4 : TRADUCTION (simulée)
 // ===================================================================
-const traductionsSimulees = {
-  en: { prefixe: "[EN] ", suffixe: "" },
-  es: { prefixe: "[ES] ", suffixe: "" },
-  ar: { prefixe: "[AR] ", suffixe: "" },
-  wo: { prefixe: "[WO] ", suffixe: "" }
-};
+
 
 const nomsLangues = {
   en: "Anglais",
@@ -165,36 +166,38 @@ const nomsLangues = {
   wo: "Wolof"
 };
 
-function genererTraductionSimulee(texte, langue) {
-  const config = traductionsSimulees[langue];
-  // Simulation : on inverse le sens des mots avec un préfixe de langue,
-  // pour donner l'impression d'un résultat traduit sans vrai modèle IA.
-  const motsInverses = texte.trim().split(/\s+/).reverse().join(" ");
-  return `${config.prefixe}${motsInverses}`;
-}
-
+// ===================================================================
+// PARTIE 4 : TRADUCTION (vrai modèle)
+// ===================================================================
 function initTraduction() {
   const bouton = document.getElementById("traduction-btn");
   const input = document.getElementById("traduction-input");
   const select = document.getElementById("traduction-langue");
   const output = document.getElementById("traduction-output");
 
-  bouton.addEventListener("click", () => {
+  bouton.addEventListener("click", async () => {
     const texte = input.value.trim();
     const langue = select.value;
+    const nomLangue = nomsLangues[langue];
 
     if (texte === "") {
       output.textContent = "Veuillez saisir un texte à traduire.";
       return;
     }
 
-    output.textContent = `Traduction vers ${nomsLangues[langue]} en cours...`;
+    output.textContent = `Traduction vers ${nomLangue} en cours...`;
 
-    setTimeout(() => {
-      const traduction = genererTraductionSimulee(texte, langue);
+    try {
+      const traduction = await appellerModeleHF([
+        { role: "system", content: `Tu es un traducteur professionnel. Traduis le texte suivant en ${nomLangue}. Réponds uniquement avec la traduction, sans aucun commentaire.` },
+        { role: "user", content: texte }
+      ]);
       output.textContent = traduction;
       ajouterHistorique("Traduction", texte, traduction);
-    }, 1000);
+    } catch (erreur) {
+      console.error(erreur);
+      output.textContent = "Erreur lors de la traduction. Vérifie ta clé API.";
+    }
   });
 }
 // ===================================================================
@@ -235,43 +238,46 @@ function ajouterMessageChat(texte, role) {
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
-
-async function envoyerMessageChat(message) {
+// ===================================================================
+// FONCTION COMMUNE : appel au modèle Hugging Face
+// ===================================================================
+async function appellerModeleHF(messages) {
   const cle = localStorage.getItem("hf_token");
 
   if (!cle) {
-    ajouterMessageChat("Merci de renseigner ta clé API Hugging Face ci-dessus avant de discuter.", "ai");
-    return;
+    throw new Error("Clé API Hugging Face manquante. Renseigne-la dans l'onglet Chat.");
   }
 
+  const reponse = await fetch(HF_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${cle}`
+    },
+    body: JSON.stringify({
+      model: HF_MODEL,
+      messages,
+      max_tokens: 300
+    })
+  });
+
+  if (!reponse.ok) {
+    const erreur = await reponse.text();
+    throw new Error(`Erreur API (${reponse.status}) : ${erreur}`);
+  }
+
+  const donnees = await reponse.json();
+  return donnees.choices[0].message.content;
+}
+
+async function envoyerMessageChat(message) {
   historiqueConversation.push({ role: "user", content: message });
 
   try {
-    const reponse = await fetch(HF_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${cle}`
-      },
-      body: JSON.stringify({
-        model: HF_MODEL,
-        messages: historiqueConversation,
-        max_tokens: 300
-      })
-    });
-
-    if (!reponse.ok) {
-      const erreur = await reponse.text();
-      throw new Error(`Erreur API (${reponse.status}) : ${erreur}`);
-    }
-
-    const donnees = await reponse.json();
-    const texteReponse = donnees.choices[0].message.content;
-
+    const texteReponse = await appellerModeleHF(historiqueConversation);
     historiqueConversation.push({ role: "assistant", content: texteReponse });
     ajouterMessageChat(texteReponse, "ai");
     ajouterHistorique("Chat", message, texteReponse);
-
   } catch (erreur) {
     console.error(erreur);
     ajouterMessageChat("Une erreur est survenue lors de l'appel au modèle. Vérifie ta clé API et ta connexion.", "ai");
@@ -301,26 +307,9 @@ function initChat() {
 // ===================================================================
 // PARTIE 6 : PRÉDICTION (fictive)
 // ===================================================================
-function genererPredictionFictive(age, revenu, ville) {
-  // Logique fictive simple, juste pour donner un résultat crédible
-  let categorie;
-  let score;
-
-  if (revenu > 500000 && age > 30) {
-    categorie = "Profil premium";
-    score = 88;
-  } else if (revenu > 200000) {
-    categorie = "Profil standard";
-    score = 65;
-  } else {
-    categorie = "Profil découverte";
-    score = 42;
-  }
-
-  return `D'après les données fournies (${age} ans, ${revenu} FCFA de revenu, ${ville}), `
-    + `le profil estimé est : "${categorie}" avec un score de confiance fictif de ${score}%.`;
-}
-
+// ===================================================================
+// PARTIE 6 : PRÉDICTION (générée par le modèle, à but illustratif/fictif)
+// ===================================================================
 function initPrediction() {
   const bouton = document.getElementById("pred-btn");
   const inputAge = document.getElementById("pred-age");
@@ -328,7 +317,7 @@ function initPrediction() {
   const inputVille = document.getElementById("pred-ville");
   const output = document.getElementById("pred-output");
 
-  bouton.addEventListener("click", () => {
+  bouton.addEventListener("click", async () => {
     const age = parseInt(inputAge.value, 10);
     const revenu = parseInt(inputRevenu.value, 10);
     const ville = inputVille.value.trim();
@@ -340,11 +329,19 @@ function initPrediction() {
 
     output.textContent = "Calcul de la prédiction...";
 
-    setTimeout(() => {
-  const resultat = genererPredictionFictive(age, revenu, ville);
-  output.textContent = resultat;
-  ajouterHistorique("Prédiction", `Âge: ${age}, Revenu: ${revenu}, Ville: ${ville}`, resultat);
-}, 600);
+    const requete = `Âge: ${age}, Revenu: ${revenu} FCFA, Ville: ${ville}`;
+
+    try {
+      const resultat = await appellerModeleHF([
+        { role: "system", content: "Tu génères un profil-client fictif et son score de confiance (en %) à partir de l'âge, du revenu et de la ville fournis. C'est un exercice illustratif, pas une vraie prédiction statistique. Réponds en 1 à 2 phrases, en français." },
+        { role: "user", content: requete }
+      ]);
+      output.textContent = resultat;
+      ajouterHistorique("Prédiction", requete, resultat);
+    } catch (erreur) {
+      console.error(erreur);
+      output.textContent = "Erreur lors de la génération de la prédiction. Vérifie ta clé API.";
+    }
   });
 }
 // ===================================================================
